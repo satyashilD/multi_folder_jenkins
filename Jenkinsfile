@@ -17,7 +17,7 @@ pipeline {
 
         stage('Get folder name') {
             steps {
-                sh "echo git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u > folder.txt" 
+                sh "echo `git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u`  > folder.txt" 
                 script {
                     project_dir_name = readFile('folder.txt').trim()
                 }                
@@ -38,6 +38,6 @@ def service_build(service_name) {
     List commit_files = commit_name.split(" ");
     SERVICE_DIR = env.BRANCH_NAME.replace("/", "%sF")
 
-    build job: "service2/${SERVICE_DIR}"
+    build job: "${commit_name}/${SERVICE_DIR}"
 }
 
