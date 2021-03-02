@@ -12,8 +12,13 @@ pipeline {
         stage('Git checkout') {
             steps {
                 checkout scm    
-            }
-            
+            } 
+        }
+
+        stage('Get folder name') {
+            steps {
+                sh "echo git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} " 
+            } 
         }
     }
 }
