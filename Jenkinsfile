@@ -20,11 +20,24 @@ pipeline {
                 sh "echo git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u > folder.txt" 
                 script {
                     project_dir_name = readFile('folder.txt').trim()
-                }
-                echo "${project_dir_name}"
-                build job: "${project_dir_name}"
-            } 
+                }                
+            }
         }
+        stage("Run service build" {
+            steps {
+                script {
+                    service = service_build("${project_dir_name}")
+                }
+            }
+        })
     }
+}
+
+def service_build(service_name) {
+    String commit_name = service_name;
+    List commit_files = commit_name.split(" ");
+    SERVICE_DIR = env.BRANCH_NAME.replace("/", "%sF")
+
+    build job: "service1/${SERVICE_DIR}"
 }
 
