@@ -23,13 +23,13 @@ pipeline {
                 }                
             }
         }
-        stage("Run service build" {
+        stage("Run service build") {
             steps {
                 script {
                     service = service_build("${project_dir_name}")
                 }
             }
-        })
+        }
     }
 }
 
