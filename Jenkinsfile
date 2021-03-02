@@ -23,7 +23,7 @@ pipeline {
                 }                
             }
         }
-        stage("Run service build") {
+        stage("Run service build" {
             steps {
                 script {
                     service = service_build("${project_dir_name}")
@@ -38,6 +38,6 @@ def service_build(service_name) {
     List commit_files = commit_name.split(" ");
     SERVICE_DIR = env.BRANCH_NAME.replace("/", "%sF")
 
-    build job: "${commit_name}"
+    build job: "service2/${SERVICE_DIR}"
 }
 
