@@ -38,6 +38,6 @@ def service_build(service_name) {
     List commit_files = commit_name.split(" ");
     SERVICE_DIR = env.BRANCH_NAME.replace("/", "%sF")
 
-    build job: "service1/${SERVICE_DIR}"
+    build job: "${commit_name}"
 }
 
