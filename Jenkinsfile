@@ -16,6 +16,11 @@ pipeline {
         }
 
         stage('Get folder name') {
+            when {
+                expression {
+                    env.CHANGE_ID == null
+                }
+            }
             steps {
                 sh """ 
                    echo "print commit id: ${env.GIT_COMMIT}"
@@ -27,6 +32,25 @@ pipeline {
                 }                
             }
         }
+        
+        stage('Get folder name for Pull Request') {
+            when {
+                expression {
+                    env.CHANGE_ID != null
+                }
+            }
+            steps {
+                sh """ 
+                   echo "print commit id: ${env.GIT_COMMIT}"
+                   echo `git diff-tree --no-commit-id --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u`  > folder.txt
+                   cat folder.txt
+                """
+                script {
+                    project_dir_name = readFile('folder.txt').trim()
+                }                
+            }
+        }
+        
         stage("Run service build") {
             steps {
                 script {
