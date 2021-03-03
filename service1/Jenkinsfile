@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+                echo "${env.CHANGE_ID}"
+                echo "${env.BRANCH_NAME}"
+            }
+        }
+        stage('Working directory and files') {
+            steps {
+                sh " pwd && ls -lrt"  
+            } 
+        }
+
+
+         stage('Build stage') {
+             steps {
+                 sh "echo This is build job " 
+             } 
+        }
+      
+      stage('Push artifacts stage') {
+             steps {
+                 sh "echo This is artifacts push stage job " 
+             } 
+        }
+    }
+}
