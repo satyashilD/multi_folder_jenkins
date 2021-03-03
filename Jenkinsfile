@@ -18,7 +18,7 @@ pipeline {
         stage('Get folder name') {
             steps {
                 sh """ 
-                   echo `git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u`  > folder.txt" 
+                   echo `git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u`  > folder.txt
                    cat folder.txt
                 """
                 script {
