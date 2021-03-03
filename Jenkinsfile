@@ -19,14 +19,14 @@ pipeline {
             steps {
                 sh """ 
                     project_name=\$(git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u)  > folder.txt
-                    echo \$(git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u)  > folder.txt" 
+                    echo `git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} | cut -d/ -f1| sort -u`  > folder.txt" 
                 """
                 script {
                     project_dir_name = readFile('folder.txt').trim()
                 }                
             }
         }
-        stage("Run service build" {
+        stage("Run service build") {
             steps {
                 script {
                     service = service_build("${project_dir_name}")
