@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+                echo "${env.CHANGE_ID}"
+                echo "${env.BRANCH_NAME}"
+            }
+        }
+        stage('Working directory and files') {
+            steps {
+                sh " pwd && ls -lrt"  
+            } 
+        }
+
+
+        // stage('Get folder name') {
+        //     steps {
+        //         sh "echo git diff-tree --no-commit-ud --name-only -r ${env.GIT_COMMIT} " 
+        //     } 
+        // }
+    }
+}
+

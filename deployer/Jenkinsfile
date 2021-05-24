@@ -1,0 +1,97 @@
+#!/usr/bin/env groovy
+pipeline {
+    agent any
+    parameters {
+        choice(
+            name: 'FUNCTION_NAME',
+            choices: ['my-math-function','my-math-function2'],
+            description: 'Lambda function name'
+        )
+        choice(
+            name: 'BRANCH_NAME',
+            choices: ['prod','main'],
+            description: 'Branch name for deployment'
+        )
+        choice(
+            name: 'SERVICE_DIRECTORY',
+            choices: ['service1','service2'],
+            description: 'SERVICE_DIRECTORY name for lambda package'
+        )
+        string(name: 'AWS_REGION', defaultValue:'us-east-1', description: '')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([
+					$class: 'GitSCM',
+					branches: [
+						[name: params.BRANCH_NAME]
+					],
+					userRemoteConfigs: [
+						[
+							credentialsId: 'jenkins_user',
+							url: 'https://github.com/satyashilD/multi_folder_jenkins.git'
+						]
+					]
+                ])
+            }
+        }
+		
+		stage('CD to service lambda directory') {
+			steps {
+			    dir("${SERVICE_DIRECTORY}") {
+    				sh '''
+						#!/bin/bash
+                        ls -lrt
+    				    zip ${SERVICE_DIRECTORY}-deployment-package.zip lambda_function.py
+    				'''
+		    	
+			}
+			}
+		}
+		
+		stage('Upload build artifact on S3') {
+			steps {
+             
+			    dir("${SERVICE_DIRECTORY}") {
+                       withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                                          credentialsId: 'aws-jenkins-user',
+                                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
+                        {
+                           sh '''
+						         #!/bin/bash
+                                 set -eux pipefail
+    				             aws s3 cp ${SERVICE_DIRECTORY}-deployment-package.zip s3://lambda-artifacts/
+    				          '''
+                        }
+		    	    }
+			    }
+		}
+
+        stage('Deploy lambda function with latest code') {
+			steps {
+			    dir("${SERVICE_DIRECTORY}") {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                                             credentialsId: 'aws-jenkins-user',
+                                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
+                        {
+                           sh '''
+						        #!/bin/bash
+                                set -eux pipefail
+    				            aws lambda update-function-code --function-name ${FUNCTION_NAME} --zip-file fileb://${SERVICE_DIRECTORY}-deployment-package.zip --region ${AWS_REGION}
+    				          '''
+                        }
+		    	   }
+			}
+		}
+		
+
+}
+}
